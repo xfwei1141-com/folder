@@ -1,0 +1,792 @@
+@import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;500;600;700&family=ZCOOL+KuaiLe&display=swap');
+
+:root {
+  --page: #fffaf0;
+  --paper: rgba(255, 254, 248, 0.78);
+  --paper-solid: #fffdf7;
+  --ink: #382b2f;
+  --muted: #7e7075;
+  --rose: #a76472;
+  --rose-dark: #784750;
+  --rose-soft: #ead3d6;
+  --blue-soft: #a9c7d3;
+  --butter: #f2e5c3;
+  --line: rgba(132, 77, 88, 0.58);
+  --line-soft: rgba(132, 77, 88, 0.2);
+  --brand-berry: #8e5a5a;
+  --heading-ink: #4f3838;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  color: var(--ink);
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  background-color: var(--page);
+  background-image:
+    radial-gradient(circle, rgba(138, 99, 74, 0.075) 0.7px, transparent 0.9px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 0.6px, transparent 0.8px);
+  background-position: 0 0, 3px 3px;
+  background-size: 6px 6px;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1.5px solid var(--line);
+  border-radius: 7px 5px 8px 6px;
+  color: var(--ink);
+  background: rgba(255, 253, 247, 0.86);
+  box-shadow: 1px 1px 0 var(--line-soft);
+  cursor: pointer;
+}
+
+button:hover {
+  background: #f9ecec;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(169, 199, 211, 0.7);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  color: #a79b9f;
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.doodle-asset {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.app {
+  width: min(1380px, calc(100% - 32px));
+  margin: 22px auto 36px;
+}
+
+.app-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 22px;
+  padding: 4px 8px 0;
+}
+
+.app-header h1 {
+  position: relative;
+  width: min(500px, 48vw);
+  height: 146px;
+  margin: 0;
+  overflow: visible;
+}
+
+.brand-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 142px;
+  max-width: none;
+  transform: translate(-50%, -50%) rotate(90deg);
+  filter: saturate(0.94) drop-shadow(1px 1px 0 rgba(142, 90, 90, 0.16));
+}
+
+.app-header p {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.page-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.72fr) minmax(520px, 1.65fr) minmax(310px, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.panel {
+  position: relative;
+  min-width: 0;
+  padding: 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 9px 6px 10px 7px / 7px 10px 6px 9px;
+  background: var(--paper);
+  box-shadow: 0 0 10px rgba(133, 82, 91, 0.08);
+}
+
+.panel::after {
+  position: absolute;
+  inset: 3px -2px -2px 2px;
+  border: 1px solid rgba(132, 77, 88, 0.18);
+  border-radius: 7px 10px 7px 9px / 9px 6px 10px 7px;
+  pointer-events: none;
+  content: "";
+}
+
+.doodle-heading {
+  margin: 0 0 13px;
+  color: var(--heading-ink);
+  font-family: "ZCOOL KuaiLe", "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 33px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.1;
+  text-shadow:
+    1px 1px 0 rgba(142, 90, 90, 0.18),
+    0 2px 0 rgba(234, 211, 214, 0.55);
+}
+
+.doodle-heading .doodle-asset {
+  width: min(100%, 270px);
+  aspect-ratio: 1800 / 512;
+}
+
+.panel-note {
+  margin: 0 0 15px;
+  color: var(--muted);
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.tutorial-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0 0 13px;
+}
+
+.tutorial-tab {
+  min-width: 0;
+  min-height: 34px;
+  padding: 6px 5px;
+  border-color: rgba(132, 77, 88, 0.36);
+  color: #66595e;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: rgba(255, 253, 247, 0.66);
+}
+
+.tutorial-tab.is-active {
+  border-color: rgba(132, 77, 88, 0.72);
+  color: var(--rose-dark);
+  font-weight: 700;
+  background: rgba(234, 211, 214, 0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.48),
+    1px 1px 0 rgba(132, 77, 88, 0.18);
+}
+
+.tutorial-steps,
+.gallery-list {
+  display: grid;
+  gap: 11px;
+}
+
+.tutorial-step {
+  position: relative;
+  padding: 11px;
+  border: 1.5px solid rgba(132, 77, 88, 0.38);
+  border-radius: 7px 5px 8px 6px;
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.tutorial-step:nth-child(2) {
+  border-radius: 5px 8px 6px 7px;
+}
+
+.tutorial-step h3,
+.tutorial-step p {
+  margin: 0;
+}
+
+.tutorial-step h3 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 8px;
+  color: var(--rose-dark);
+  font-size: 15px;
+}
+
+.tutorial-step-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 27px;
+  padding: 3px 9px 4px;
+  border: 1px solid rgba(142, 90, 90, 0.3);
+  border-radius: 999px 10px 999px 12px;
+  color: #8e5a5a;
+  font-family: "ZCOOL KuaiLe", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  line-height: 1;
+  background: rgba(244, 224, 222, 0.78);
+  box-shadow: 1px 1px 0 rgba(142, 90, 90, 0.12);
+  transform: rotate(-1deg);
+}
+
+.tutorial-step-title {
+  color: #5e4747;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tutorial-step p {
+  margin-top: 8px;
+  color: #66595e;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.tutorial-image-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(132, 77, 88, 0.24);
+  border-radius: 7px 6px 8px 6px;
+  background: rgba(255, 253, 247, 0.62);
+}
+
+.tutorial-image {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 220px;
+  object-fit: contain;
+}
+
+.tutorial-tip {
+  padding: 10px 11px;
+  border: 1.5px dashed rgba(132, 77, 88, 0.36);
+  border-radius: 8px 6px 9px 7px;
+  color: #66595e;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 12px;
+  line-height: 1.6;
+  background: rgba(242, 229, 195, 0.28);
+}
+
+.tutorial-tip strong {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--rose-dark);
+}
+
+.image-placeholder,
+.gallery-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed rgba(132, 77, 88, 0.42);
+  border-radius: 6px 8px 5px 7px;
+  color: var(--muted);
+  background-color: rgba(242, 229, 195, 0.22);
+  background-image: radial-gradient(circle, rgba(167, 100, 114, 0.08) 0.7px, transparent 0.9px);
+  background-size: 5px 5px;
+}
+
+.image-placeholder {
+  min-height: 112px;
+  flex-direction: column;
+  gap: 4px;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 11px;
+}
+
+.placeholder-icon {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+  opacity: 0.72;
+}
+
+.creator-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.creator-heading .doodle-asset {
+  width: min(100%, 300px);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  border: 1.5px solid rgba(132, 77, 88, 0.36);
+  border-radius: 7px 9px 6px 8px;
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.tool-control {
+  min-height: 36px;
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  padding: 5px 8px;
+  border-right: 1px dashed rgba(132, 77, 88, 0.32);
+  color: #594a4f;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 12px;
+}
+
+.tool-control-wide {
+  flex: 1 1 205px;
+}
+
+.tool-icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+}
+
+.toolbar button {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 12px;
+}
+
+.toolbar button.is-active {
+  border-color: rgba(120, 71, 80, 0.82);
+  color: #fffdf7;
+  background: var(--rose);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.24),
+    1px 1px 0 rgba(132, 77, 88, 0.22);
+}
+
+input[type="color"] {
+  width: 30px;
+  height: 26px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"] {
+  min-width: 74px;
+  flex: 1 1 90px;
+  accent-color: var(--rose);
+}
+
+.canvas-area {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.canvas-stack {
+  position: relative;
+  width: 256px;
+  height: 256px;
+  border: 2px solid rgba(91, 57, 64, 0.74);
+  border-radius: 8px 5px 9px 6px;
+  background: rgba(255, 255, 255, 0.64);
+  box-shadow:
+    2px 2px 0 rgba(167, 100, 114, 0.16),
+    0 0 12px rgba(167, 100, 114, 0.08);
+}
+
+.canvas-stack::after {
+  position: absolute;
+  inset: 3px -3px -3px 3px;
+  z-index: 2;
+  border: 1px solid rgba(132, 77, 88, 0.18);
+  border-radius: 6px 9px 5px 8px;
+  pointer-events: none;
+  content: "";
+}
+
+.guide-canvas,
+.drawing-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 256px;
+  height: 256px;
+}
+
+.guide-canvas {
+  pointer-events: none;
+}
+
+.drawing-canvas {
+  z-index: 1;
+  background: transparent;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='25' viewBox='0 0 25 25'%3E%3Cpath d='M12 0v25M0 12h25' stroke='white' stroke-width='3'/%3E%3Cpath d='M12 0v25M0 12h25' stroke='black' stroke-width='1.4'/%3E%3Ccircle cx='12' cy='12' r='3.3' fill='none' stroke='white' stroke-width='2.5'/%3E%3Ccircle cx='12' cy='12' r='3.3' fill='none' stroke='black' stroke-width='1.2'/%3E%3C/svg%3E") 12 12, crosshair;
+}
+
+.drawing-canvas.is-fill-mode {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='25' viewBox='0 0 25 25'%3E%3Cpath d='M12 0v25M0 12h25' stroke='white' stroke-width='3'/%3E%3Cpath d='M12 0v25M0 12h25' stroke='black' stroke-width='1.4'/%3E%3Ccircle cx='12' cy='12' r='3.3' fill='none' stroke='white' stroke-width='2.5'/%3E%3Ccircle cx='12' cy='12' r='3.3' fill='none' stroke='black' stroke-width='1.2'/%3E%3C/svg%3E") 12 12, cell;
+}
+
+.preview-area {
+  padding-top: 14px;
+  border-top: 1.5px dashed rgba(132, 77, 88, 0.34);
+}
+
+.preview-heading {
+  margin-bottom: 9px;
+}
+
+.desktop-preview {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  overflow: hidden;
+  border: 2px solid rgba(91, 57, 64, 0.7);
+  border-radius: 7px 9px 6px 8px;
+  background: #8fb9c8;
+  box-shadow: 2px 2px 0 rgba(167, 100, 114, 0.18);
+}
+
+.desktop-preview::before {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0.8px, transparent 1px);
+  background-size: 6px 6px;
+  pointer-events: none;
+  content: "";
+}
+
+.desktop-wallpaper-mark {
+  position: absolute;
+  top: 54px;
+  right: 54px;
+  display: grid;
+  grid-template-columns: repeat(2, 54px);
+  grid-template-rows: repeat(2, 64px);
+  gap: 5px;
+  transform: perspective(220px) rotateY(-10deg);
+  opacity: 0.26;
+}
+
+.desktop-wallpaper-mark span {
+  display: block;
+  border-radius: 3px;
+  background: #fff8e8;
+}
+
+.desktop-icons {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: repeat(3, 78px);
+  grid-auto-flow: column;
+  grid-auto-columns: 84px;
+  gap: 4px 8px;
+  padding: 14px 12px 40px;
+}
+
+.desktop-item {
+  width: 84px;
+  min-height: 78px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+}
+
+.preview-canvas {
+  display: block;
+  width: 56px;
+  height: 56px;
+  background: transparent;
+}
+
+.desktop-item-label {
+  max-width: 80px;
+  color: #ffffff;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 2px rgba(48, 36, 40, 0.84);
+}
+
+.desktop-taskbar {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  background: rgba(77, 67, 79, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.desktop-start-icon {
+  display: grid;
+  grid-template-columns: repeat(2, 7px);
+  grid-template-rows: repeat(2, 7px);
+  gap: 2px;
+}
+
+.desktop-start-icon span {
+  display: block;
+  border-radius: 1px;
+  background: #fff8e8;
+}
+
+.desktop-clock {
+  color: #ffffff;
+  font-size: 11px;
+}
+
+.gallery-panel {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.gallery-heading .doodle-asset {
+  width: min(100%, 285px);
+}
+
+.gallery-card {
+  min-width: 0;
+  padding: 9px;
+  border: 1.5px solid rgba(132, 77, 88, 0.38);
+  border-radius: 6px 8px 5px 7px;
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.gallery-card:nth-child(2n) {
+  border-radius: 8px 5px 7px 6px;
+}
+
+.gallery-image {
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 1 / 1.08;
+}
+
+.gallery-placeholder-icon {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+  opacity: 0.42;
+}
+
+.gallery-card-meta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: end;
+  margin-top: 8px;
+}
+
+.gallery-card h3,
+.gallery-card p {
+  margin: 0;
+}
+
+.gallery-card h3 {
+  overflow: hidden;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gallery-card p {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--muted);
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 9.5px;
+  line-height: 1.3;
+}
+
+.gallery-card p span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.author-icon {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+}
+
+.gallery-card button {
+  width: 29px;
+  min-height: 29px;
+  height: 29px;
+  padding: 3px;
+}
+
+.gallery-card button .tool-icon {
+  width: 20px;
+  height: 20px;
+  flex-basis: 20px;
+}
+
+.gallery-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  padding-top: 3px;
+}
+
+.gallery-pagination button {
+  min-width: 30px;
+  min-height: 30px;
+  padding: 3px 7px;
+  font-size: 12px;
+}
+
+.gallery-pagination [aria-current="page"] {
+  color: #ffffff;
+  background: var(--rose);
+}
+
+.gallery-pagination .page-arrow {
+  width: 32px;
+  padding: 4px;
+}
+
+.page-arrow .tool-icon {
+  width: 22px;
+  height: 22px;
+  flex-basis: 22px;
+}
+
+.previous-page .tool-icon {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 1120px) {
+  .page-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tutorial-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .gallery-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .desktop-icons {
+    grid-template-rows: repeat(2, 78px);
+  }
+}
+
+@media (min-width: 1121px) {
+  .gallery-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .app {
+    width: min(100% - 18px, 1380px);
+    margin-top: 14px;
+  }
+
+  .app-header {
+    display: block;
+    padding: 0 4px;
+  }
+
+  .app-header h1 {
+    width: min(100%, 390px);
+    height: 112px;
+  }
+
+  .brand-title {
+    width: 108px;
+  }
+
+  .doodle-heading {
+    font-size: 30px;
+  }
+
+  .app-header p {
+    margin-top: 5px;
+  }
+
+  .panel {
+    padding: 12px;
+  }
+
+  .tutorial-steps,
+  .gallery-list {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .toolbar {
+    align-items: stretch;
+  }
+
+  .tool-control,
+  .toolbar button {
+    flex: 1 1 calc(50% - 8px);
+  }
+
+  .desktop-preview {
+    height: 280px;
+  }
+}
