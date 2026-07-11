@@ -25,6 +25,10 @@ import refreshStep4Image from '../图片/系统交互图标/refresh-step-4.png';
 const CANVAS_SIZE = 256;
 const HELPER_FOLDER_NAME = 'FolderDoodle_Helper';
 const DESKTOP_FOLDER_NAMES = ['项目文件夹', '游戏文件夹', '学习文件夹', '图片文件夹'];
+const contributionImageModules = import.meta.glob(
+  '../图片/网友贡献图片/*.{png,jpg,jpeg,webp}',
+  { eager: true, import: 'default' },
+);
 const TUTORIAL_TABS = [
   {
     id: 'single',
@@ -113,70 +117,34 @@ const TUTORIAL_TABS = [
     ],
   },
 ];
-// Temporary official gallery acceptance-test data. Replace these entries with real submissions later.
-const GALLERY_ITEMS = [
-  {
-    name: '箭头测试作品',
-    author: 'Arrow Test',
-    image: nextIcon,
-  },
-  {
-    name: '撤回测试作品',
-    author: 'Undo Test',
-    image: undoIcon,
-  },
-  {
-    name: '下载测试作品',
-    author: '测试用户01',
-    image: downloadIcon,
-  },
-  {
-    name: '文件夹测试作品',
-    author: '测试用户02',
-    image: galleryIcon,
-  },
-  {
-    name: '调色盘测试作品',
-    author: '测试用户03',
-    image: paletteIcon,
-  },
-  {
-    name: '线条测试作品',
-    author: '测试用户04',
-    image: thicknessIcon,
-  },
-  {
-    name: '橡皮测试作品',
-    author: '测试用户05',
-    image: eraserIcon,
-  },
-  {
-    name: '头像测试作品',
-    author: '测试用户06',
-    image: avatarIcon,
-  },
-  {
-    name: '单个替换截图',
-    author: '测试用户07',
-    image: singleStep1Image,
-  },
-  {
-    name: '批量应用截图',
-    author: '测试用户08',
-    image: batchStep1Image,
-  },
-  {
-    name: '刷新说明截图',
-    author: '测试用户09',
-    image: refreshStep1Image,
-  },
-  {
-    name: '确认应用截图',
-    author: '测试用户10',
-    image: singleStep4Image,
-  },
-];
 const GALLERY_PAGE_SIZE = 8;
+
+const getContributionBaseName = (path) =>
+  decodeURIComponent(path.split('/').pop().replace(/\.[^.]+$/, ''));
+
+const getContributionMeta = (path) => {
+  const baseName = getContributionBaseName(path);
+  const [rawAuthor, rawName] = baseName.split('+');
+  const author = rawAuthor?.trim() || '无';
+  const name = rawName?.trim() || `${author}投稿作品`;
+
+  return { author, name, baseName };
+};
+
+const GALLERY_ITEMS = Object.entries(contributionImageModules)
+  .sort(([pathA], [pathB]) => pathA.localeCompare(pathB, 'zh-Hans-CN'))
+  .map(([path, imageUrl]) => {
+    const { author, name, baseName } = getContributionMeta(path);
+
+    return {
+      id: path,
+      name,
+      author,
+      imageUrl,
+      filename: `${baseName}.ico`,
+      isPlaceholder: false,
+    };
+  });
 
 const applyBatContent = String.raw`@echo off
 chcp 65001 >nul
@@ -934,6 +902,112 @@ const createIcoBlob = async (canvas) => {
   return new Blob([icoBuffer], { type: 'image/x-icon' });
 };
 
+const loadImage = (src) =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('图片加载失败，无法生成 ICO'));
+    image.src = src;
+  });
+
+const removeConnectedEdgeBackground = (canvas) => {
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+  const { data } = imageData;
+  const pixelCount = canvas.width * canvas.height;
+  const visited = new Uint8Array(pixelCount);
+  const queue = new Int32Array(pixelCount);
+  let queueStart = 0;
+  let queueEnd = 0;
+  const background = [data[0], data[1], data[2]];
+
+  const isBackground = (pixelIndex) => {
+    const offset = pixelIndex * 4;
+    const red = data[offset] - background[0];
+    const green = data[offset + 1] - background[1];
+    const blue = data[offset + 2] - background[2];
+
+    return red * red + green * green + blue * blue < 10000;
+  };
+
+  const addPixel = (pixelIndex) => {
+    if (
+      pixelIndex < 0 ||
+      pixelIndex >= pixelCount ||
+      visited[pixelIndex] ||
+      !isBackground(pixelIndex)
+    ) {
+      return;
+    }
+
+    visited[pixelIndex] = 1;
+    queue[queueEnd] = pixelIndex;
+    queueEnd += 1;
+  };
+
+  for (let x = 0; x < canvas.width; x += 1) {
+    addPixel(x);
+    addPixel((canvas.height - 1) * canvas.width + x);
+  }
+
+  for (let y = 0; y < canvas.height; y += 1) {
+    addPixel(y * canvas.width);
+    addPixel(y * canvas.width + canvas.width - 1);
+  }
+
+  while (queueStart < queueEnd) {
+    const pixelIndex = queue[queueStart];
+    const x = pixelIndex % canvas.width;
+
+    queueStart += 1;
+
+    if (x > 0) addPixel(pixelIndex - 1);
+    if (x < canvas.width - 1) addPixel(pixelIndex + 1);
+    addPixel(pixelIndex - canvas.width);
+    addPixel(pixelIndex + canvas.width);
+  }
+
+  for (let pixelIndex = 0; pixelIndex < pixelCount; pixelIndex += 1) {
+    if (visited[pixelIndex]) {
+      data[pixelIndex * 4 + 3] = 0;
+    }
+  }
+
+  context.putImageData(imageData, 0, 0);
+};
+
+const createGalleryIcoBlob = async (imageUrl) => {
+  const image = await loadImage(imageUrl);
+  const sourceCanvas = document.createElement('canvas');
+  const sourceContext = sourceCanvas.getContext('2d');
+
+  sourceCanvas.width = image.naturalWidth;
+  sourceCanvas.height = image.naturalHeight;
+  sourceContext.drawImage(image, 0, 0);
+  removeConnectedEdgeBackground(sourceCanvas);
+
+  const iconCanvas = document.createElement('canvas');
+  const iconContext = iconCanvas.getContext('2d');
+  const scale = Math.min(
+    CANVAS_SIZE / sourceCanvas.width,
+    CANVAS_SIZE / sourceCanvas.height,
+  );
+  const width = sourceCanvas.width * scale;
+  const height = sourceCanvas.height * scale;
+  const x = (CANVAS_SIZE - width) / 2;
+  const y = (CANVAS_SIZE - height) / 2;
+
+  iconCanvas.width = CANVAS_SIZE;
+  iconCanvas.height = CANVAS_SIZE;
+  iconContext.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+  iconContext.imageSmoothingEnabled = true;
+  iconContext.imageSmoothingQuality = 'high';
+  iconContext.drawImage(sourceCanvas, x, y, width, height);
+
+  return createIcoBlob(iconCanvas);
+};
+
 const hexToRgba = (hexColor) => {
   const normalizedColor = hexColor.replace('#', '');
   const red = Number.parseInt(normalizedColor.slice(0, 2), 16);
@@ -1318,11 +1392,66 @@ function CreatorPanel({
   );
 }
 
+function GalleryDownloadLink({ item }) {
+  const [downloadUrl, setDownloadUrl] = useState('');
+
+  useEffect(() => {
+    if (item.isPlaceholder) {
+      return;
+    }
+
+    let isMounted = true;
+    let objectUrl = '';
+
+    setDownloadUrl('');
+    createGalleryIcoBlob(item.imageUrl).then((icoBlob) => {
+      if (!isMounted) {
+        return;
+      }
+
+      objectUrl = URL.createObjectURL(icoBlob);
+      setDownloadUrl(objectUrl);
+    });
+
+    return () => {
+      isMounted = false;
+
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [item]);
+
+  if (!downloadUrl) {
+    return (
+      <button
+        type="button"
+        className="gallery-download-link"
+        aria-label={`下载${item.name}`}
+        disabled
+      >
+        <ToolIcon src={downloadIcon} />
+      </button>
+    );
+  }
+
+  return (
+    <a
+      className="gallery-download-link"
+      href={downloadUrl}
+      download={item.filename}
+      aria-label={`下载${item.name}`}
+    >
+      <ToolIcon src={downloadIcon} />
+    </a>
+  );
+}
+
 function GalleryCard({ item }) {
   return (
     <article className="gallery-card">
       <div className="gallery-image">
-        <DoodleAsset src={item.image} alt={item.name} className="gallery-artwork-image" />
+        <DoodleAsset src={item.imageUrl} alt={item.name} className="gallery-artwork-image" />
       </div>
       <div className="gallery-card-meta">
         <div>
@@ -1332,9 +1461,7 @@ function GalleryCard({ item }) {
             <span>{item.author}</span>
           </p>
         </div>
-        <button type="button" aria-label={`下载${item.name}`}>
-          <ToolIcon src={downloadIcon} />
-        </button>
+        <GalleryDownloadLink item={item} />
       </div>
     </article>
   );
@@ -1343,8 +1470,20 @@ function GalleryCard({ item }) {
 function GalleryPanel() {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(GALLERY_ITEMS.length / GALLERY_PAGE_SIZE));
+  const paddedItemCount = totalPages * GALLERY_PAGE_SIZE;
+  const paddedItems = [
+    ...GALLERY_ITEMS,
+    ...Array.from({ length: paddedItemCount - GALLERY_ITEMS.length }, (_, index) => ({
+      id: `placeholder-${index}`,
+      name: '无',
+      author: '无',
+      imageUrl: galleryIcon,
+      filename: '',
+      isPlaceholder: true,
+    })),
+  ];
   const pageStart = (currentPage - 1) * GALLERY_PAGE_SIZE;
-  const visibleItems = GALLERY_ITEMS.slice(pageStart, pageStart + GALLERY_PAGE_SIZE);
+  const visibleItems = paddedItems.slice(pageStart, pageStart + GALLERY_PAGE_SIZE);
   const canGoPrevious = currentPage > 1;
   const canGoNext = currentPage < totalPages;
 
@@ -1357,7 +1496,7 @@ function GalleryPanel() {
 
       <div className="gallery-list">
         {visibleItems.map((item) => (
-          <GalleryCard item={item} key={item.name} />
+          <GalleryCard item={item} key={item.id} />
         ))}
       </div>
 

@@ -662,14 +662,32 @@ input[type="range"] {
   flex: 0 0 15px;
 }
 
-.gallery-card button {
+.gallery-download-link {
   width: 29px;
   min-height: 29px;
   height: 29px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 3px;
+  border: 1.5px solid var(--line);
+  border-radius: 7px 5px 8px 6px;
+  color: var(--ink);
+  background: rgba(255, 253, 247, 0.86);
+  box-shadow: 1px 1px 0 var(--line-soft);
+  cursor: pointer;
 }
 
-.gallery-card button .tool-icon {
+.gallery-download-link:hover {
+  background: #f9ecec;
+}
+
+.gallery-download-link:focus-visible {
+  outline: 3px solid rgba(169, 199, 211, 0.7);
+  outline-offset: 2px;
+}
+
+.gallery-download-link .tool-icon {
   width: 20px;
   height: 20px;
   flex-basis: 20px;
