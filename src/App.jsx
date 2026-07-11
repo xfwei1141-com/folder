@@ -232,8 +232,8 @@ const GALLERY_ITEMS_BY_TYPE = {
 };
 
 const GALLERY_EMPTY_NOTES = {
-  folder: '也想分享你的作品？小红书@“2016763850”账号的帖子吧！',
-  cursor: '鼠标展示区已经分出来啦。这里会只收录鼠标指针作品，不会混用文件夹图标。',
+  folder: '也想分享你的作品？小红书@“42016763850”账号的帖子吧！',
+  cursor: '也想分享你的作品？小红书查看“42016763850”账号的帖子吧！',
 };
 
 const GALLERY_PLACEHOLDER_TEXT = {
