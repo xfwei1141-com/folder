@@ -315,3 +315,61 @@ Restore.bat 当前逻辑：
 - 如果日志显示成功但桌面图标仍不变，先右键桌面刷新，再尝试手动重启 Windows 资源管理器。
 - 重点观察桌面文件夹外观是否真正变化，而不是只复制了 `.folder-doodle-icon.ico`。
 - 运行 `Restore.bat` 后确认默认图标恢复、`.folder-doodle-icon.ico` 删除、原有 `desktop.ini` 没有被误删。
+
+## 2026-07-11 Git / Vercel Analytics 最新进度
+
+本轮用户目标是把 Folder Doodle 项目接入 GitHub / Vercel，并为正式部署后的访问量统计接入 Vercel Analytics。用户也在学习 Git 命令含义，后续回答 Git 相关问题时要尽量解释命令作用，不要只给命令。
+
+Git 当前状态：
+
+- 当前项目目录 `D:\Desktop\文件夹图标修改网站` 已经是 Git 仓库。
+- 当前分支为 `main`，远程跟踪为 `origin/main`。
+- 用户已经能自行执行 `git status`、`git add .`、`git commit`、`git remote -v`、`git push` 等命令。
+- 曾解释过：
+  - `git init`：只在项目首次交给 Git 管理时使用，正常仓库不要反复执行。
+  - `git status`：查看工作区 / 暂存区 / 分支状态，是最常用排查命令。
+  - `git add .`：把当前目录下应提交的改动放入暂存区，不等于提交或上传。
+  - `git commit -m "..."`：把暂存区保存成本地版本快照。
+  - `git branch -M main`：把当前分支改名为 `main`。
+  - `git remote add origin ...`：绑定 GitHub 远程仓库。
+  - `git push -u origin main`：第一次推送并建立本地分支与远程分支的追踪关系。
+  - `git fetch origin`：只获取远程最新信息，不修改工作区文件。
+  - `git pull --ff-only`：只允许快进式拉取，学习阶段比直接 `git pull` 更稳。
+- 用户遇到 `LF will be replaced by CRLF` 时已说明这是 Windows 换行提醒，不是失败；`warning` 不等于 `fatal`。
+- 用户提到想定期复习 Git 命令；如果后续需要，可在项目内重新补一份 `Git命令复习指南.md`，围绕本项目写命令含义。
+
+Vercel Analytics 当前状态：
+
+- 项目确认是 React + Vite，不是 Next.js。
+- 入口文件：
+  - `src/main.jsx`：React 入口，渲染 `<App />`。
+  - `src/App.jsx`：项目根组件，当前页面结构在这里。
+- 没有 `layout.tsx`、`_app.tsx` 等 Next.js 入口。
+- 已安装官方依赖：
+  - `package.json` / `package-lock.json` 中包含 `@vercel/analytics`。
+  - 本地 `node_modules/@vercel/analytics` 存在。
+- `src/App.jsx` 已接入：
+  - 顶部 import：`import { Analytics } from '@vercel/analytics/react';`
+  - 根组件返回内容中渲染：`<Analytics />`
+- 该组件不会显示可见 UI，不应改变现有布局、样式、Canvas、下载功能或三栏结构。
+- 接入时参考的是 Vercel 官方推荐的 Web Analytics 方案：普通 React/Vite 使用 `@vercel/analytics/react`。
+- 已执行过 `npm.cmd run build`，构建通过。
+
+Vercel 后续注意事项：
+
+- 部署到 Vercel 后，还需要在 Vercel 项目的 Analytics 页面启用 Web Analytics。
+- Analytics 数据通常要等部署后的真实访问发生后，才会在 Vercel Dashboard 中出现。
+- 不需要额外增加复杂埋点；当前阶段只做基础访问统计。
+
+当前工作区提醒：
+
+- 最近检查到 Git 工作区存在未提交改动：
+  - `src/App.jsx`
+  - `src/styles.css`
+- `src/App.jsx` 包含 Analytics 接入。
+- `src/styles.css` 的改动可能来自用户前面的视觉调整；除非明确要求，不要覆盖或回退。
+- 后续提交前建议执行：
+  - `git status`
+  - `git diff -- src/App.jsx src/styles.css`
+  - `npm.cmd run build`
+- 如果只提交 Analytics，可让用户确认 `src/styles.css` 是否也要一起提交；不要擅自丢弃样式改动。

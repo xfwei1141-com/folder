@@ -608,11 +608,11 @@ input[type="range"] {
   aspect-ratio: 1 / 1.08;
 }
 
-.gallery-placeholder-icon {
-  width: 68%;
-  height: 68%;
+.gallery-artwork-image {
+  width: 72%;
+  height: 72%;
   object-fit: contain;
-  opacity: 0.42;
+  opacity: 0.86;
 }
 
 .gallery-card-meta {

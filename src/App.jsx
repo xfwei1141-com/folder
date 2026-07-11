@@ -113,42 +113,67 @@ const TUTORIAL_TABS = [
     ],
   },
 ];
+// Temporary official gallery acceptance-test data. Replace these entries with real submissions later.
 const GALLERY_ITEMS = [
   {
-    name: '猫猫图标',
-    author: 'Folder Doodle',
+    name: '箭头测试作品',
+    author: 'Arrow Test',
+    image: nextIcon,
   },
   {
-    name: '星星图标',
-    author: '官方精选',
+    name: '撤回测试作品',
+    author: 'Undo Test',
+    image: undoIcon,
   },
   {
-    name: '鱼鱼图标',
-    author: '官方精选',
+    name: '下载测试作品',
+    author: '测试用户01',
+    image: downloadIcon,
   },
   {
-    name: '花花图标',
-    author: 'Folder Doodle',
+    name: '文件夹测试作品',
+    author: '测试用户02',
+    image: galleryIcon,
   },
   {
-    name: '云朵图标',
-    author: '示例作者',
+    name: '调色盘测试作品',
+    author: '测试用户03',
+    image: paletteIcon,
   },
   {
-    name: '便签图标',
-    author: '示例作者',
+    name: '线条测试作品',
+    author: '测试用户04',
+    image: thicknessIcon,
   },
   {
-    name: '小熊图标',
-    author: 'Folder Doodle',
+    name: '橡皮测试作品',
+    author: '测试用户05',
+    image: eraserIcon,
   },
   {
-    name: '月亮图标',
-    author: '官方精选',
+    name: '头像测试作品',
+    author: '测试用户06',
+    image: avatarIcon,
   },
   {
-    name: '草莓图标',
-    author: '示例作者',
+    name: '单个替换截图',
+    author: '测试用户07',
+    image: singleStep1Image,
+  },
+  {
+    name: '批量应用截图',
+    author: '测试用户08',
+    image: batchStep1Image,
+  },
+  {
+    name: '刷新说明截图',
+    author: '测试用户09',
+    image: refreshStep1Image,
+  },
+  {
+    name: '确认应用截图',
+    author: '测试用户10',
+    image: singleStep4Image,
   },
 ];
 const GALLERY_PAGE_SIZE = 8;
@@ -1297,7 +1322,7 @@ function GalleryCard({ item }) {
   return (
     <article className="gallery-card">
       <div className="gallery-image">
-        <DoodleAsset src={galleryIcon} alt="作品图片待替换" className="gallery-placeholder-icon" />
+        <DoodleAsset src={item.image} alt={item.name} className="gallery-artwork-image" />
       </div>
       <div className="gallery-card-meta">
         <div>
@@ -1316,6 +1341,13 @@ function GalleryCard({ item }) {
 }
 
 function GalleryPanel() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(GALLERY_ITEMS.length / GALLERY_PAGE_SIZE));
+  const pageStart = (currentPage - 1) * GALLERY_PAGE_SIZE;
+  const visibleItems = GALLERY_ITEMS.slice(pageStart, pageStart + GALLERY_PAGE_SIZE);
+  const canGoPrevious = currentPage > 1;
+  const canGoNext = currentPage < totalPages;
+
   return (
     <section className="panel gallery-panel" aria-labelledby="gallery-title">
       <DoodleHeading alt="官方收录" className="gallery-heading" />
@@ -1324,20 +1356,43 @@ function GalleryPanel() {
       <p className="panel-note">也想分享你的作品？小红书@“42016763850”账号的帖子吧！</p>
 
       <div className="gallery-list">
-        {GALLERY_ITEMS.slice(0, GALLERY_PAGE_SIZE).map((item) => (
+        {visibleItems.map((item) => (
           <GalleryCard item={item} key={item.name} />
         ))}
       </div>
 
       <nav className="gallery-pagination" aria-label="图库分页">
-        <button type="button" className="page-arrow previous-page" aria-label="上一页">
+        <button
+          type="button"
+          className="page-arrow previous-page"
+          aria-label="上一页"
+          onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+          disabled={!canGoPrevious}
+        >
           <ToolIcon src={nextIcon} />
         </button>
-        <button type="button" aria-current="page">1</button>
-        <button type="button">2</button>
-        <button type="button">3</button>
-        <span>...</span>
-        <button type="button" className="page-arrow" aria-label="下一页">
+        {Array.from({ length: totalPages }, (_, index) => {
+          const pageNumber = index + 1;
+          const isCurrentPage = pageNumber === currentPage;
+
+          return (
+            <button
+              type="button"
+              aria-current={isCurrentPage ? 'page' : undefined}
+              key={pageNumber}
+              onClick={() => setCurrentPage(pageNumber)}
+            >
+              {pageNumber}
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          className="page-arrow"
+          aria-label="下一页"
+          onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+          disabled={!canGoNext}
+        >
           <ToolIcon src={nextIcon} />
         </button>
       </nav>
