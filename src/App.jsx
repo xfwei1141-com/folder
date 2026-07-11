@@ -1320,7 +1320,7 @@ function GalleryPanel() {
       <DoodleHeading alt="官方收录" className="gallery-heading" />
       <span id="gallery-title" className="sr-only">官方收录</span>
 
-      <p className="panel-note">也想分享你的作品？小红书查看“26268603491”账号的帖子吧！</p>
+      <p className="panel-note">也想分享你的作品？小红书@“42016763850”账号的帖子吧！</p>
 
       <div className="gallery-list">
         {GALLERY_ITEMS.slice(0, GALLERY_PAGE_SIZE).map((item) => (
