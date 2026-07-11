@@ -21,12 +21,31 @@ import refreshStep1Image from '../图片/系统交互图标/换新图标的第�
 import refreshStep2Image from '../图片/系统交互图标/换新图标的第二步：替换ico文件.png';
 import refreshStep3Image from '../图片/系统交互图标/换新图标的重要第三步：重命名为 current！！！.png';
 import refreshStep4Image from '../图片/系统交互图标/refresh-step-4.png';
+import cursorStep1Image from '../图片/鼠标区/cursor-step-1.png';
+import cursorStep2Image from '../图片/鼠标区/cursor-step-2.png';
+import cursorStep3Image from '../图片/鼠标区/cursor-step-3.png';
+import cursorStep4Image from '../图片/鼠标区/cursor-step-4.png';
 
 const CANVAS_SIZE = 256;
+const CURSOR_HOTSPOT = 24;
 const HELPER_FOLDER_NAME = 'FolderDoodle_Helper';
+const CANVAS_TYPES = [
+  {
+    id: 'folder',
+    label: '文件夹图标',
+  },
+  {
+    id: 'cursor',
+    label: '鼠标指针',
+  },
+];
 const DESKTOP_FOLDER_NAMES = ['项目文件夹', '游戏文件夹', '学习文件夹', '图片文件夹'];
-const contributionImageModules = import.meta.glob(
+const folderContributionImageModules = import.meta.glob(
   '../图片/网友贡献图片/*.{png,jpg,jpeg,webp}',
+  { eager: true, import: 'default' },
+);
+const cursorContributionImageModules = import.meta.glob(
+  '../图片/鼠标官方展示/*.{png,jpg,jpeg,webp}',
   { eager: true, import: 'default' },
 );
 const TUTORIAL_TABS = [
@@ -117,6 +136,63 @@ const TUTORIAL_TABS = [
     ],
   },
 ];
+
+const CURSOR_TUTORIAL_TABS = [
+  {
+    id: 'cursor',
+    label: '鼠标指针',
+    tip: '小提示：这里不会自动修改系统鼠标。下载的是 .cur 指针文件，你可以在 Windows 设置里手动选择，想恢复时也可以换回系统默认方案。',
+    steps: [
+      {
+        label: 'Step 1',
+        title: '下载 CUR',
+        description: '切到“鼠标指针”画布，画好后点击“下载 CUR”，把指针文件保存到电脑里。',
+        image: cursorStep1Image,
+      },
+      {
+        label: 'Step 2',
+        title: '进入鼠标设置',
+        description: '打开 Windows 设置，进入“蓝牙和设备”，再点击“鼠标”。',
+        image: cursorStep2Image,
+      },
+      {
+        label: 'Step 3',
+        title: '打开其他鼠标设置',
+        description: '在鼠标页面里找到“其他鼠标设置”，打开传统鼠标属性窗口。',
+        image: cursorStep3Image,
+      },
+      {
+        label: 'Step 4',
+        title: '选择本地 CUR',
+        description: '切到“指针”标签，选择要替换的状态，点击“浏览”并选中刚下载的 .cur 文件，最后应用。',
+        image: cursorStep4Image,
+      },
+    ],
+  },
+];
+
+const TUTORIAL_GROUPS = [
+  {
+    id: 'folder',
+    label: '换文件夹',
+    tabs: TUTORIAL_TABS,
+  },
+  {
+    id: 'cursor',
+    label: '换鼠标样子',
+    tabs: CURSOR_TUTORIAL_TABS,
+  },
+];
+const GALLERY_GROUPS = [
+  {
+    id: 'folder',
+    label: '文件夹',
+  },
+  {
+    id: 'cursor',
+    label: '鼠标',
+  },
+];
 const GALLERY_PAGE_SIZE = 8;
 
 const getContributionBaseName = (path) =>
@@ -131,20 +207,39 @@ const getContributionMeta = (path) => {
   return { author, name, baseName };
 };
 
-const GALLERY_ITEMS = Object.entries(contributionImageModules)
-  .sort(([pathA], [pathB]) => pathA.localeCompare(pathB, 'zh-Hans-CN'))
-  .map(([path, imageUrl]) => {
-    const { author, name, baseName } = getContributionMeta(path);
+const createGalleryItems = (imageModules, fileExtension) =>
+  Object.entries(imageModules)
+    .sort(([pathA], [pathB]) => pathA.localeCompare(pathB, 'zh-Hans-CN'))
+    .map(([path, imageUrl]) => {
+      const { author, name, baseName } = getContributionMeta(path);
 
-    return {
-      id: path,
-      name,
-      author,
-      imageUrl,
-      filename: `${baseName}.ico`,
-      isPlaceholder: false,
-    };
-  });
+      return {
+        id: path,
+        name,
+        author,
+        imageUrl,
+        filename: `${baseName}.${fileExtension}`,
+        isPlaceholder: false,
+      };
+    });
+
+const FOLDER_GALLERY_ITEMS = createGalleryItems(folderContributionImageModules, 'ico');
+const CURSOR_GALLERY_ITEMS = createGalleryItems(cursorContributionImageModules, 'cur');
+
+const GALLERY_ITEMS_BY_TYPE = {
+  folder: FOLDER_GALLERY_ITEMS,
+  cursor: CURSOR_GALLERY_ITEMS,
+};
+
+const GALLERY_EMPTY_NOTES = {
+  folder: '也想分享你的作品？小红书@“2016763850”账号的帖子吧！',
+  cursor: '鼠标展示区已经分出来啦。这里会只收录鼠标指针作品，不会混用文件夹图标。',
+};
+
+const GALLERY_PLACEHOLDER_TEXT = {
+  folder: '文件夹作品待收录',
+  cursor: '鼠标作品待收录',
+};
 
 const applyBatContent = String.raw`@echo off
 chcp 65001 >nul
@@ -868,6 +963,28 @@ const traceFolderShape = (context) => {
   context.closePath();
 };
 
+const drawCursorHotspotGuide = (context) => {
+  context.save();
+  context.strokeStyle = 'rgba(120, 71, 80, 0.24)';
+  context.fillStyle = 'rgba(120, 71, 80, 0.28)';
+  context.lineWidth = 2;
+  context.setLineDash([5, 6]);
+  context.beginPath();
+  context.moveTo(CURSOR_HOTSPOT, 0);
+  context.lineTo(CURSOR_HOTSPOT, CANVAS_SIZE);
+  context.moveTo(0, CURSOR_HOTSPOT);
+  context.lineTo(CANVAS_SIZE, CURSOR_HOTSPOT);
+  context.stroke();
+  context.setLineDash([]);
+  context.beginPath();
+  context.arc(CURSOR_HOTSPOT, CURSOR_HOTSPOT, 5, 0, Math.PI * 2);
+  context.fill();
+  context.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+  context.lineWidth = 2;
+  context.stroke();
+  context.restore();
+};
+
 const canvasToPngBlob = (canvas) =>
   new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -900,6 +1017,33 @@ const createIcoBlob = async (canvas) => {
   new Uint8Array(icoBuffer, headerSize).set(pngBytes);
 
   return new Blob([icoBuffer], { type: 'image/x-icon' });
+};
+
+const createCursorBlob = async (
+  canvas,
+  hotspotX = CURSOR_HOTSPOT,
+  hotspotY = CURSOR_HOTSPOT,
+) => {
+  const pngBlob = await canvasToPngBlob(canvas);
+  const pngBytes = new Uint8Array(await pngBlob.arrayBuffer());
+  const headerSize = 22;
+  const cursorBuffer = new ArrayBuffer(headerSize + pngBytes.length);
+  const view = new DataView(cursorBuffer);
+
+  view.setUint16(0, 0, true);
+  view.setUint16(2, 2, true);
+  view.setUint16(4, 1, true);
+  view.setUint8(6, 0);
+  view.setUint8(7, 0);
+  view.setUint8(8, 0);
+  view.setUint8(9, 0);
+  view.setUint16(10, hotspotX, true);
+  view.setUint16(12, hotspotY, true);
+  view.setUint32(14, pngBytes.length, true);
+  view.setUint32(18, headerSize, true);
+  new Uint8Array(cursorBuffer, headerSize).set(pngBytes);
+
+  return new Blob([cursorBuffer], { type: 'image/x-icon' });
 };
 
 const loadImage = (src) =>
@@ -1006,6 +1150,37 @@ const createGalleryIcoBlob = async (imageUrl) => {
   iconContext.drawImage(sourceCanvas, x, y, width, height);
 
   return createIcoBlob(iconCanvas);
+};
+
+const createGalleryCursorBlob = async (imageUrl) => {
+  const image = await loadImage(imageUrl);
+  const sourceCanvas = document.createElement('canvas');
+  const sourceContext = sourceCanvas.getContext('2d');
+
+  sourceCanvas.width = image.naturalWidth;
+  sourceCanvas.height = image.naturalHeight;
+  sourceContext.drawImage(image, 0, 0);
+  removeConnectedEdgeBackground(sourceCanvas);
+
+  const cursorCanvas = document.createElement('canvas');
+  const cursorContext = cursorCanvas.getContext('2d');
+  const scale = Math.min(
+    CANVAS_SIZE / sourceCanvas.width,
+    CANVAS_SIZE / sourceCanvas.height,
+  );
+  const width = sourceCanvas.width * scale;
+  const height = sourceCanvas.height * scale;
+  const x = (CANVAS_SIZE - width) / 2;
+  const y = (CANVAS_SIZE - height) / 2;
+
+  cursorCanvas.width = CANVAS_SIZE;
+  cursorCanvas.height = CANVAS_SIZE;
+  cursorContext.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+  cursorContext.imageSmoothingEnabled = true;
+  cursorContext.imageSmoothingQuality = 'high';
+  cursorContext.drawImage(sourceCanvas, x, y, width, height);
+
+  return createCursorBlob(cursorCanvas);
 };
 
 const hexToRgba = (hexColor) => {
@@ -1120,16 +1295,46 @@ const downloadBlob = (blob, fileName) => {
 };
 
 function TutorialPanel() {
-  const [activeTabId, setActiveTabId] = useState(TUTORIAL_TABS[0].id);
-  const activeTab = TUTORIAL_TABS.find((tab) => tab.id === activeTabId) ?? TUTORIAL_TABS[0];
+  const [activeGroupId, setActiveGroupId] = useState(TUTORIAL_GROUPS[0].id);
+  const [activeTabId, setActiveTabId] = useState(TUTORIAL_GROUPS[0].tabs[0].id);
+  const activeGroup =
+    TUTORIAL_GROUPS.find((group) => group.id === activeGroupId) ?? TUTORIAL_GROUPS[0];
+  const activeTab =
+    activeGroup.tabs.find((tab) => tab.id === activeTabId) ?? activeGroup.tabs[0];
 
   return (
     <section className="panel tutorial-panel" aria-labelledby="tutorial-title">
       <DoodleHeading alt="如何使用？" />
       <span id="tutorial-title" className="sr-only">如何使用？</span>
 
+      <div className="use-tabs" role="tablist" aria-label="用途分类">
+        {TUTORIAL_GROUPS.map((group) => {
+          const isActive = group.id === activeGroup.id;
+
+          return (
+            <button
+              type="button"
+              className={`use-tab ${isActive ? 'is-active' : ''}`.trim()}
+              role="tab"
+              aria-selected={isActive}
+              key={group.id}
+              onClick={() => {
+                setActiveGroupId(group.id);
+                setActiveTabId(group.tabs[0].id);
+              }}
+            >
+              {group.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <aside className="tutorial-browser-note">
+        因为浏览器安全限制，我们无法让网页“一点就直接修改本地系统”；但我们已经尽可能帮你打包好了脚本，也制作好了清楚的手动教程，跟着步骤来就行。
+      </aside>
+
       <div className="tutorial-tabs" role="tablist" aria-label="教程分类">
-        {TUTORIAL_TABS.map((tab) => {
+        {activeGroup.tabs.map((tab) => {
           const isActive = tab.id === activeTab.id;
 
           return (
@@ -1161,14 +1366,16 @@ function TutorialPanel() {
               <span className="tutorial-step-label">{step.label}</span>
               <span className="tutorial-step-title">{step.title}</span>
             </h3>
-            <div className="tutorial-image-frame">
-              <img
-                className="tutorial-image"
-                src={step.image}
-                alt={`${step.label}：${step.title}`}
-                loading="lazy"
-              />
-            </div>
+            {step.image ? (
+              <div className="tutorial-image-frame">
+                <img
+                  className="tutorial-image"
+                  src={step.image}
+                  alt={`${step.label}：${step.title}`}
+                  loading="lazy"
+                />
+              </div>
+            ) : null}
             <p>{step.description}</p>
           </article>
         ))}
@@ -1184,6 +1391,7 @@ function TutorialPanel() {
 }
 
 function CreatorToolbar({
+  activeCanvasType,
   brushColor,
   brushSize,
   canUndo,
@@ -1191,6 +1399,7 @@ function CreatorToolbar({
   onBrushColorChange,
   onBrushSizeChange,
   onClearCanvas,
+  onDownloadCursor,
   onDownloadHelper,
   onDownloadIco,
   onDownloadPng,
@@ -1242,15 +1451,24 @@ function CreatorToolbar({
         <span>清空画布</span>
       </button>
 
-      <button type="button" onClick={onDownloadIco}>
-        <ToolIcon src={downloadIcon} />
-        <span>下载 ICO</span>
-      </button>
+      {activeCanvasType === 'folder' ? (
+        <>
+          <button type="button" onClick={onDownloadIco}>
+            <ToolIcon src={downloadIcon} />
+            <span>下载 ICO</span>
+          </button>
 
-      <button type="button" onClick={onDownloadHelper}>
-        <ToolIcon src={downloadIcon} />
-        <span>下载批量应用包</span>
-      </button>
+          <button type="button" onClick={onDownloadHelper}>
+            <ToolIcon src={downloadIcon} />
+            <span>下载批量应用包</span>
+          </button>
+        </>
+      ) : (
+        <button type="button" onClick={onDownloadCursor}>
+          <ToolIcon src={downloadIcon} />
+          <span>下载 CUR</span>
+        </button>
+      )}
 
       <button type="button" onClick={onDownloadPng}>
         <ToolIcon src={downloadIcon} />
@@ -1261,6 +1479,7 @@ function CreatorToolbar({
 }
 
 function DrawingCanvas({
+  activeCanvasType,
   canvasRef,
   drawingMode,
   guideCanvasRef,
@@ -1280,65 +1499,101 @@ function DrawingCanvas({
         />
         <canvas
           ref={canvasRef}
-          className={`drawing-canvas ${drawingMode === 'fill' ? 'is-fill-mode' : ''}`.trim()}
+          className={`drawing-canvas ${drawingMode === 'fill' ? 'is-fill-mode' : ''} ${
+            activeCanvasType === 'cursor' ? 'is-cursor-canvas' : ''
+          }`.trim()}
           width={CANVAS_SIZE}
           height={CANVAS_SIZE}
           onMouseDown={onStartDrawing}
           onMouseMove={onDraw}
           onMouseUp={onStopDrawing}
           onMouseLeave={onStopDrawing}
-          aria-label="文件夹图标绘图区域"
+          aria-label={activeCanvasType === 'cursor' ? '鼠标指针绘图区域' : '文件夹图标绘图区域'}
         />
       </div>
     </section>
   );
 }
 
-function DesktopPreview({ previewCanvasRefs }) {
+function DesktopPreview({ activeCanvasType, previewCanvasRefs }) {
   return (
     <section className="preview-area" aria-labelledby="preview-title">
-      <DoodleHeading alt="效果预览" className="preview-heading" />
-      <span id="preview-title" className="sr-only">效果预览</span>
-      <div className="desktop-preview" aria-label="模拟 Windows 桌面效果">
-        <div className="desktop-wallpaper-mark" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span />
-        </div>
-
-        <div className="desktop-icons">
-          {DESKTOP_FOLDER_NAMES.map((folderName, index) => (
-            <div className="desktop-item" key={folderName}>
-              <canvas
-                ref={(element) => {
-                  previewCanvasRefs.current[index] = element;
-                }}
-                className="preview-canvas"
-                width={CANVAS_SIZE}
-                height={CANVAS_SIZE}
-                aria-label={`使用用户图标的${folderName}`}
-              />
-              <span className="desktop-item-label">{folderName}</span>
+      <DoodleHeading
+        alt={activeCanvasType === 'cursor' ? '鼠标预览' : '效果预览'}
+        className="preview-heading"
+      />
+      <span id="preview-title" className="sr-only">
+        {activeCanvasType === 'cursor' ? '鼠标预览' : '效果预览'}
+      </span>
+      {activeCanvasType === 'cursor' ? (
+        <div className="cursor-preview" aria-label="模拟鼠标指针效果">
+          <div className="cursor-preview-window">
+            <div className="cursor-preview-bar" aria-hidden="true">
+              <span />
+              <span />
+              <span />
             </div>
-          ))}
+            <div className="cursor-preview-content">
+              <button type="button">按钮</button>
+              <span>文字链接</span>
+              <div className="cursor-preview-pointer">
+                <canvas
+                  ref={(element) => {
+                    previewCanvasRefs.current[0] = element;
+                  }}
+                  className="cursor-preview-canvas"
+                  width={CANVAS_SIZE}
+                  height={CANVAS_SIZE}
+                  aria-label="当前鼠标指针预览"
+                />
+                <span className="cursor-hotspot-preview" aria-hidden="true" />
+              </div>
+            </div>
+          </div>
         </div>
+      ) : (
+        <div className="desktop-preview" aria-label="模拟 Windows 桌面效果">
+          <div className="desktop-wallpaper-mark" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
 
-        <div className="desktop-taskbar" aria-hidden="true">
-          <span className="desktop-start-icon">
-            <span />
-            <span />
-            <span />
-            <span />
-          </span>
-          <span className="desktop-clock">10:30</span>
+          <div className="desktop-icons">
+            {DESKTOP_FOLDER_NAMES.map((folderName, index) => (
+              <div className="desktop-item" key={folderName}>
+                <canvas
+                  ref={(element) => {
+                    previewCanvasRefs.current[index] = element;
+                  }}
+                  className="preview-canvas"
+                  width={CANVAS_SIZE}
+                  height={CANVAS_SIZE}
+                  aria-label={`使用用户图标的${folderName}`}
+                />
+                <span className="desktop-item-label">{folderName}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="desktop-taskbar" aria-hidden="true">
+            <span className="desktop-start-icon">
+              <span />
+              <span />
+              <span />
+              <span />
+            </span>
+            <span className="desktop-clock">10:30</span>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }
 
 function CreatorPanel({
+  activeCanvasType,
   brushColor,
   brushSize,
   canUndo,
@@ -1348,7 +1603,9 @@ function CreatorPanel({
   previewCanvasRefs,
   onBrushColorChange,
   onBrushSizeChange,
+  onCanvasTypeChange,
   onClearCanvas,
+  onDownloadCursor,
   onDownloadHelper,
   onDownloadIco,
   onDownloadPng,
@@ -1363,7 +1620,27 @@ function CreatorPanel({
       <DoodleHeading alt="开始涂鸦" className="creator-heading" />
       <span id="creator-title" className="sr-only">开始涂鸦</span>
 
+      <div className="use-tabs creator-use-tabs" role="tablist" aria-label="画布用途">
+        {CANVAS_TYPES.map((canvasType) => {
+          const isActive = canvasType.id === activeCanvasType;
+
+          return (
+            <button
+              type="button"
+              className={`use-tab ${isActive ? 'is-active' : ''}`.trim()}
+              role="tab"
+              aria-selected={isActive}
+              key={canvasType.id}
+              onClick={() => onCanvasTypeChange(canvasType.id)}
+            >
+              {canvasType.label}
+            </button>
+          );
+        })}
+      </div>
+
       <CreatorToolbar
+        activeCanvasType={activeCanvasType}
         brushColor={brushColor}
         brushSize={brushSize}
         canUndo={canUndo}
@@ -1371,6 +1648,7 @@ function CreatorPanel({
         onBrushColorChange={onBrushColorChange}
         onBrushSizeChange={onBrushSizeChange}
         onClearCanvas={onClearCanvas}
+        onDownloadCursor={onDownloadCursor}
         onDownloadHelper={onDownloadHelper}
         onDownloadIco={onDownloadIco}
         onDownloadPng={onDownloadPng}
@@ -1379,6 +1657,7 @@ function CreatorPanel({
       />
 
       <DrawingCanvas
+        activeCanvasType={activeCanvasType}
         canvasRef={canvasRef}
         drawingMode={drawingMode}
         guideCanvasRef={guideCanvasRef}
@@ -1387,12 +1666,12 @@ function CreatorPanel({
         onStopDrawing={onStopDrawing}
       />
 
-      <DesktopPreview previewCanvasRefs={previewCanvasRefs} />
+      <DesktopPreview activeCanvasType={activeCanvasType} previewCanvasRefs={previewCanvasRefs} />
     </section>
   );
 }
 
-function GalleryDownloadLink({ item }) {
+function GalleryDownloadLink({ item, variant }) {
   const [downloadUrl, setDownloadUrl] = useState('');
 
   useEffect(() => {
@@ -1404,12 +1683,14 @@ function GalleryDownloadLink({ item }) {
     let objectUrl = '';
 
     setDownloadUrl('');
-    createGalleryIcoBlob(item.imageUrl).then((icoBlob) => {
+    const createBlob = variant === 'cursor' ? createGalleryCursorBlob : createGalleryIcoBlob;
+
+    createBlob(item.imageUrl).then((downloadBlob) => {
       if (!isMounted) {
         return;
       }
 
-      objectUrl = URL.createObjectURL(icoBlob);
+      objectUrl = URL.createObjectURL(downloadBlob);
       setDownloadUrl(objectUrl);
     });
 
@@ -1420,7 +1701,7 @@ function GalleryDownloadLink({ item }) {
         URL.revokeObjectURL(objectUrl);
       }
     };
-  }, [item]);
+  }, [item, variant]);
 
   if (!downloadUrl) {
     return (
@@ -1447,9 +1728,9 @@ function GalleryDownloadLink({ item }) {
   );
 }
 
-function GalleryCard({ item }) {
+function GalleryCard({ item, variant }) {
   return (
-    <article className="gallery-card">
+    <article className={`gallery-card ${variant === 'cursor' ? 'is-cursor-card' : ''}`.trim()}>
       <div className="gallery-image">
         <DoodleAsset src={item.imageUrl} alt={item.name} className="gallery-artwork-image" />
       </div>
@@ -1461,22 +1742,26 @@ function GalleryCard({ item }) {
             <span>{item.author}</span>
           </p>
         </div>
-        <GalleryDownloadLink item={item} />
+        <GalleryDownloadLink item={item} variant={variant} />
       </div>
     </article>
   );
 }
 
 function GalleryPanel() {
+  const [activeGalleryType, setActiveGalleryType] = useState(GALLERY_GROUPS[0].id);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(GALLERY_ITEMS.length / GALLERY_PAGE_SIZE));
+  const activeGalleryGroup =
+    GALLERY_GROUPS.find((group) => group.id === activeGalleryType) ?? GALLERY_GROUPS[0];
+  const activeGalleryItems = GALLERY_ITEMS_BY_TYPE[activeGalleryGroup.id] ?? [];
+  const totalPages = Math.max(1, Math.ceil(activeGalleryItems.length / GALLERY_PAGE_SIZE));
   const paddedItemCount = totalPages * GALLERY_PAGE_SIZE;
   const paddedItems = [
-    ...GALLERY_ITEMS,
-    ...Array.from({ length: paddedItemCount - GALLERY_ITEMS.length }, (_, index) => ({
-      id: `placeholder-${index}`,
-      name: '无',
-      author: '无',
+    ...activeGalleryItems,
+    ...Array.from({ length: paddedItemCount - activeGalleryItems.length }, (_, index) => ({
+      id: `${activeGalleryGroup.id}-placeholder-${index}`,
+      name: GALLERY_PLACEHOLDER_TEXT[activeGalleryGroup.id],
+      author: 'Folder Doodle',
       imageUrl: galleryIcon,
       filename: '',
       isPlaceholder: true,
@@ -1492,11 +1777,35 @@ function GalleryPanel() {
       <DoodleHeading alt="官方收录" className="gallery-heading" />
       <span id="gallery-title" className="sr-only">官方收录</span>
 
-      <p className="panel-note">也想分享你的作品？小红书@“42016763850”账号的帖子吧！</p>
+      <div className="use-tabs" role="tablist" aria-label="图库分类">
+        {GALLERY_GROUPS.map((group) => {
+          const isActive = group.id === activeGalleryGroup.id;
+
+          return (
+            <button
+              type="button"
+              className={`use-tab ${isActive ? 'is-active' : ''}`.trim()}
+              role="tab"
+              aria-selected={isActive}
+              key={group.id}
+              onClick={() => {
+                setActiveGalleryType(group.id);
+                setCurrentPage(1);
+              }}
+            >
+              {group.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="panel-note">
+        {GALLERY_EMPTY_NOTES[activeGalleryGroup.id]}
+      </p>
 
       <div className="gallery-list">
         {visibleItems.map((item) => (
-          <GalleryCard item={item} key={item.id} />
+          <GalleryCard item={item} variant={activeGalleryGroup.id} key={item.id} />
         ))}
       </div>
 
@@ -1544,29 +1853,88 @@ function App() {
   const canvasRef = useRef(null);
   const previewCanvasRefs = useRef([]);
   const isDrawingRef = useRef(false);
-  const undoStackRef = useRef([]);
+  const canvasSnapshotsRef = useRef({
+    folder: null,
+    cursor: null,
+  });
+  const undoStacksRef = useRef({
+    folder: [],
+    cursor: [],
+  });
+  const activeCanvasTypeRef = useRef('folder');
+  const [activeCanvasType, setActiveCanvasType] = useState('folder');
   const [brushColor, setBrushColor] = useState('#000000');
   const [brushSize, setBrushSize] = useState(12);
   const [canUndo, setCanUndo] = useState(false);
   const [drawingMode, setDrawingMode] = useState('draw');
 
-  useEffect(() => {
-    const guideCanvas = guideCanvasRef.current;
-    const guideContext = guideCanvas.getContext('2d');
+  const getActiveUndoStack = () => undoStacksRef.current[activeCanvasTypeRef.current];
+
+  const syncCanUndo = () => {
+    setCanUndo(getActiveUndoStack().length > 0);
+  };
+
+  const storeCanvasSnapshot = (canvasType = activeCanvasTypeRef.current) => {
     const canvas = canvasRef.current;
+
+    if (!canvas) {
+      return;
+    }
+
     const context = canvas.getContext('2d');
+    canvasSnapshotsRef.current[canvasType] = context.getImageData(
+      0,
+      0,
+      canvas.width,
+      canvas.height,
+    );
+  };
+
+  const loadCanvasSnapshot = (canvasType) => {
+    const canvas = canvasRef.current;
+
+    if (!canvas) {
+      return;
+    }
+
+    const context = canvas.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (canvasSnapshotsRef.current[canvasType]) {
+      context.putImageData(canvasSnapshotsRef.current[canvasType], 0, 0);
+    }
+
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    context.lineWidth = brushSize;
+  };
+
+  const drawGuide = (canvasType) => {
+    const guideCanvas = guideCanvasRef.current;
+
+    if (!guideCanvas) {
+      return;
+    }
+
+    const guideContext = guideCanvas.getContext('2d');
 
     guideContext.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+
+    if (canvasType === 'cursor') {
+      drawCursorHotspotGuide(guideContext);
+      return;
+    }
+
     guideContext.strokeStyle = 'rgba(0, 0, 0, 0.3)';
     guideContext.lineWidth = 6;
     guideContext.lineJoin = 'round';
     traceFolderShape(guideContext);
     guideContext.stroke();
+  };
 
-    context.lineCap = 'round';
-    context.lineJoin = 'round';
-    context.lineWidth = brushSize;
-
+  useEffect(() => {
+    drawGuide(activeCanvasTypeRef.current);
+    loadCanvasSnapshot(activeCanvasTypeRef.current);
     updatePreview();
   }, []);
 
@@ -1595,6 +1963,25 @@ function App() {
     });
   };
 
+  useEffect(() => {
+    updatePreview();
+  }, [activeCanvasType]);
+
+  const changeCanvasType = (nextCanvasType) => {
+    if (nextCanvasType === activeCanvasTypeRef.current) {
+      return;
+    }
+
+    storeCanvasSnapshot(activeCanvasTypeRef.current);
+    activeCanvasTypeRef.current = nextCanvasType;
+    setActiveCanvasType(nextCanvasType);
+    setDrawingMode('draw');
+    drawGuide(nextCanvasType);
+    loadCanvasSnapshot(nextCanvasType);
+    setCanUndo(undoStacksRef.current[nextCanvasType].length > 0);
+    window.requestAnimationFrame(updatePreview);
+  };
+
   const saveUndoState = () => {
     const canvas = canvasRef.current;
 
@@ -1603,8 +1990,9 @@ function App() {
     }
 
     const context = canvas.getContext('2d');
-    undoStackRef.current = [
-      ...undoStackRef.current,
+    const activeUndoStack = getActiveUndoStack();
+    undoStacksRef.current[activeCanvasTypeRef.current] = [
+      ...activeUndoStack,
       context.getImageData(0, 0, canvas.width, canvas.height),
     ].slice(-20);
     setCanUndo(true);
@@ -1661,14 +2049,15 @@ function App() {
   const undoCanvas = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
-    const previousState = undoStackRef.current.pop();
+    const activeUndoStack = getActiveUndoStack();
+    const previousState = activeUndoStack.pop();
 
     if (!previousState) {
       return;
     }
 
     context.putImageData(previousState, 0, 0);
-    setCanUndo(undoStackRef.current.length > 0);
+    syncCanUndo();
     updatePreview();
   };
 
@@ -1695,6 +2084,13 @@ function App() {
     const icoBlob = await createIcoBlob(canvas);
 
     downloadBlob(icoBlob, 'folder-icon.ico');
+  };
+
+  const downloadCursor = async () => {
+    const canvas = canvasRef.current;
+    const cursorBlob = await createCursorBlob(canvas);
+
+    downloadBlob(cursorBlob, 'folder-doodle-cursor.cur');
   };
 
   const downloadHelper = async () => {
@@ -1725,6 +2121,7 @@ function App() {
       <div className="page-layout">
         <TutorialPanel />
         <CreatorPanel
+          activeCanvasType={activeCanvasType}
           brushColor={brushColor}
           brushSize={brushSize}
           canUndo={canUndo}
@@ -1734,7 +2131,9 @@ function App() {
           previewCanvasRefs={previewCanvasRefs}
           onBrushColorChange={(event) => setBrushColor(event.target.value)}
           onBrushSizeChange={(event) => setBrushSize(Number(event.target.value))}
+          onCanvasTypeChange={changeCanvasType}
           onClearCanvas={clearCanvas}
+          onDownloadCursor={downloadCursor}
           onDownloadHelper={downloadHelper}
           onDownloadIco={downloadIco}
           onDownloadPng={downloadPng}
