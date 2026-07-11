@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import React, { useEffect, useRef, useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import brandTitle from '../图片/folder-doodle-title-vertical.jpg';
 import paletteIcon from '../图片/调色盘.jpg';
 import thicknessIcon from '../图片/粗和细的线.jpg';
@@ -1551,6 +1552,7 @@ function App() {
         />
         <GalleryPanel />
       </div>
+      <Analytics />
     </main>
   );
 }
